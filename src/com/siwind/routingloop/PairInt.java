@@ -80,7 +80,7 @@ public class PairInt implements WritableComparable<PairInt> {
     }
 
     @Override
-    protected PairInt clone() {
+    public PairInt clone() {
         // TODO Auto-generated method stub
         return new PairInt(first, second);
     }
