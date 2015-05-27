@@ -200,7 +200,8 @@ public class RoutingLoopDetection {
             looping.clear();
 
             for (PairInt v : values) {
-                pairs.add(v.clone());    //why here must be clone()? v is temproraley variable,and should not using it!
+                //why here must be clone()? v is a temproraley variable,and should not using it!
+                pairs.add(v.clone());
                 //pairs.add(v);
                 //System.out.println(v.toString());
             }
