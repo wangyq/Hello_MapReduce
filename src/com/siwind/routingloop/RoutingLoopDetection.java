@@ -109,7 +109,8 @@ public class RoutingLoopDetection {
         job.setReducerClass(ReduceClass.class);
 
         // the map output is IntPair, IntWritable
-        job.setMapOutputKeyClass(Text.class);
+        //job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputKeyClass(PairInt.class);
         job.setMapOutputValueClass(PairInt.class);
 
         // the reduce output is Text, IntWritable
@@ -133,13 +134,17 @@ public class RoutingLoopDetection {
     }
 
     /**
-     * Read four strings from each line and generate a key, value pair as (<ip,
-     * mask_len>, <from,to>) for example: 192.168.1.0 24 1 3
+     * Read four strings from each line and generate a key, value pair as
+     * (<ip, mask_len>, <from,to>)
+     * for example:
+     * 192.168.1.0 24 1 3
      */
     public static class MapClass extends
-            Mapper<Object, Text, Text, PairInt> {
+            Mapper<Object, Text, PairInt, PairInt> {
+            //Mapper<Object, Text, Text, PairInt> {
 
-        private final Text key = new Text();
+        //private final Text key = new Text();
+        private final PairInt key = new PairInt();
         private final PairInt value = new PairInt();
 
         @Override
@@ -164,7 +169,7 @@ public class RoutingLoopDetection {
             //
             ipaddr = IpUtil.getNetInt(ipaddr, masklen);
 
-            key.set(IpUtil.Ip2Str(ipaddr) + "/" + masklen);
+            key.set(ipaddr, masklen);
             value.set(from, to);
             context.write(key, value);
             //System.out.println(key.toString() + "-->" + value.toString());
@@ -174,13 +179,17 @@ public class RoutingLoopDetection {
     /**
      * A reducer class that just emits the sum of the input values.
      */
-    public static class ReduceClass extends Reducer<Text, PairInt, Text, Text> {
+    public static class ReduceClass
+            //extends Reducer<Text, PairInt, Text, Text> {
+            extends Reducer<PairInt, PairInt, Text, Text> {
         private ArrayList<PairInt> pairs = new ArrayList<PairInt>();
         private ArrayList<PairInt> looping = new ArrayList<PairInt>();
+        private Text keyText = new Text();
         private Text value = new Text();
 
         @Override
-        public void reduce(Text key, Iterable<PairInt> values, Context context)
+        public void reduce(PairInt key, Iterable<PairInt> values, Context context)
+        //public void reduce(Text key, Iterable<PairInt> values, Context context)
                 throws IOException, InterruptedException {
 
             int i = 0;
@@ -191,9 +200,9 @@ public class RoutingLoopDetection {
             looping.clear();
 
             for (PairInt v : values) {
-                pairs.add(v.clone());    //why here must be clone()?
+                pairs.add(v.clone());    //why here must be clone()? v is temproraley variable,and should not using it!
+                //pairs.add(v);
                 //System.out.println(v.toString());
-                // context.write(first, value);
             }
 
             //Collections.sort(pairs); //sort first!
@@ -217,7 +226,9 @@ public class RoutingLoopDetection {
             }
 
             value.set(str.toString());
-            context.write(key, value);
+            keyText.set(IpUtil.Ip2Str(key.getFirst())+"/"+key.getSecond());
+            context.write(keyText, value);
+            //context.write(key, value);
 
             //System.out.println("Reduce: " + key.toString() + "-->" + value.toString());
 
