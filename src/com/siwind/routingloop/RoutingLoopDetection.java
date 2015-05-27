@@ -73,6 +73,7 @@ public class RoutingLoopDetection {
 	 */
 	public static class ReduceClass extends Reducer<Text, PairInt, Text, Text> {
 		private ArrayList<PairInt> pairs = new ArrayList<PairInt>();
+        private ArrayList<PairInt> looping = new ArrayList<PairInt>();
 		private Text value = new Text();
 
 		@Override
@@ -84,6 +85,7 @@ public class RoutingLoopDetection {
 			
 			//ArrayList<PairInt> pairs = new ArrayList<PairInt>();
 			pairs.clear(); // clear all data in it!
+            looping.clear();
 
 			for (PairInt v : values) {
 				pairs.add(v.clone());    //why here must be clone()?
@@ -92,23 +94,27 @@ public class RoutingLoopDetection {
 			}
 			
 			//Collections.sort(pairs); //sort first!
-			isLooping = isRoutingLoop(pairs);
+			isLooping = isRoutingLoop(pairs,looping);
 			
-			StringBuilder str = new StringBuilder();
+			StringBuilder str = new StringBuilder("(");
 			for (i = 0; i < pairs.size() - 1; i++) {
 				str.append(pairs.get(i).toString() + ",");
 			}
-			str.append(pairs.get(i).toString());
+			str.append(pairs.get(i).toString() + ")");
 
-			str.append(" --> ");
+            if( looping.size() > 0 ){//find looping
+                str.append(" [" + looping.get(0) + "," + looping.get(1) + "]");
+            }
+
+            str.append(" --> ");
 			if (isLooping) {
 				str.append("YES");
 			} else {
 				str.append("NO");
-			}
+            }
 
-			value.set(str.toString());
-			context.write(key, value);
+            value.set(str.toString());
+            context.write(key, value);
 			
 			//System.out.println("Reduce: " + key.toString() + "-->" + value.toString());
 			
@@ -120,27 +126,33 @@ public class RoutingLoopDetection {
 	 * @param pairs
 	 * @return
 	 */
-	public static boolean isRoutingLoop(ArrayList<PairInt> pairs) {
+	public static boolean isRoutingLoop(ArrayList<PairInt> pairs, ArrayList<PairInt> looping) {
 		boolean isLoop = false;
 
 		//sort first!
 		Collections.sort(pairs);
 		
 		if (null != pairs) {
-			int last = 0;
 			int i = 0, j = 0;
 			PairInt p;
-			
-			for (i = 0; i < pairs.size()-1 && !isLoop; i++) {
-				last = i;  //
-				for(j=i+1;j<pairs.size();j++){//find a loop from start node of i
+			boolean bFlags = true;
+
+			for (i = 0; i < pairs.size()-1 && !isLoop && bFlags; i++) {
+                int first = pairs.get(i).getFirst();
+                int last = pairs.get(i).getSecond();
+				bFlags = false;
+				for(j=i+1;j<pairs.size();j++){//find whether a loop occur from start node  i
 					p = pairs.get(j);
-					if( pairs.get(last).getSecond() == p.getFirst() ){ //
-						last = j;
-						if( pairs.get(i).getFirst() == p.getSecond() ){
+					if( last == p.getFirst() ){
+						last = p.getSecond();
+						if( first == last ){// is looping now
 							isLoop = true;
+                            looping.add(pairs.get(i));
+                            looping.add(p);
 							break;
 						}
+					} else{
+						bFlags = true;  // the link broken.
 					}
 					
 				}
