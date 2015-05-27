@@ -9,6 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="library" name="Hadoop_Lib_2.5.2" level="project" />
-    <orderEntry type="library" name="common" level="application" />
+    <orderEntry type="library" name="Hadoop-2.5.2" level="application" />
   </component>
 </module>
