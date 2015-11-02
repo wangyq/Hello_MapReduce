@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" inherit-compiler-output="false">
-    <output url="file://$MODULE_DIR$/bin" />
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <output url="file://$MODULE_DIR$/../out/production/Hello_MapReduce" />
+    <output-test url="file://$MODULE_DIR$/../out/test/Hello_MapReduce" />
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
-    <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="inheritedJdk" />
-    <orderEntry type="library" name="Hadoop_Lib_2.5.2" level="project" />
-    <orderEntry type="library" name="Hadoop-2.5.2" level="application" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="hadoop2.5.2" level="application" />
   </component>
 </module>
